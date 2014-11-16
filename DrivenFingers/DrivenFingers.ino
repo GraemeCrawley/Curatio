@@ -41,6 +41,8 @@ void setup() {
     servos[i].attach(servoPins[i]);
     servos[i].write(90);                 
   }
+  
+  Serial.println("Waiting for input to begin.");
 
   Serial.flush(); //flush all previous received and transmitted data
   while(!Serial.available()) ;
@@ -61,17 +63,10 @@ void setup() {
   }
   Serial.println("Done");
   delay(500);
-  
-  Wire.begin(2);
-  Wire.onReceive(receiveEvent);
+  Serial.flush();
 }
 
-void receiveEvent(int howMany){
-  for(int i = 0; i < 4; i++){
-   int val = (int)(Wire.read());
-   fingerSetPoints[i] = val;
-  }
-}
+boolean shouldRun = false;
 
 void loop(){
   
@@ -85,24 +80,54 @@ void loop(){
     double pVal = error * kP;
     if(pVal > 90) pVal = 90;
     
-    if (abs(fingerSetPoints[i]-relativePos[i])<deadbandRadius){
-      servos[i].write(90);
-    }
-    else if (fingerSetPoints[i]-relativePos[i]>0){
-      servos[i].write(90+(pVal)*servoOrientation[i]);
-    }
-    else if (fingerSetPoints[i]-relativePos[i]<0){
-      servos[i].write(90-(pVal)*servoOrientation[i]);
+    if(shouldRun){
+      if (abs(fingerSetPoints[i]-relativePos[i])<deadbandRadius){
+        servos[i].write(90);
+      }
+      else if (fingerSetPoints[i]-relativePos[i]>0){
+        servos[i].write(90+(pVal)*servoOrientation[i]);
+      }
+      else if (fingerSetPoints[i]-relativePos[i]<0){
+        servos[i].write(90-(pVal)*servoOrientation[i]);
+      }
     }
   }
   
   if(Serial.available()){
     char input = Serial.read();
-    if(input == ('g')){
-      for(int i = 0; i < numFingers; i++) fingerSetPoints[i] = 127;
+    if(input == ('s')){
+      shouldRun = false; 
     }
-    if(input == ('r')){
+    if(input == ('g')){
+      Serial.println("Grabbing");
+      for(int i = 0; i < numFingers; i++) fingerSetPoints[i] = 200;
+      shouldRun = true;
+    }
+    if(input == ('l')){
+      Serial.println("Letting Go");
       for(int i = 0; i < numFingers; i++) fingerSetPoints[i] = 10;
+      shouldRun = true;
+    }
+    if(input = ('p')){
+      Serial.println("Party On");
+      fingerSetPoints[0] = 10;
+      fingerSetPoints[1] = 200;
+      fingerSetPoints[2] = 200;
+      fingerSetPoints[3] = 10;
+    }
+    if(input == ('f')){
+      Serial.println("Being Fancy");
+      fingerSetPoints[0] = 200;
+      fingerSetPoints[1] = 200;
+      fingerSetPoints[2] = 200;
+      fingerSetPoints[3] = 10;
+    }
+    if(input == ('p')){
+      Serial.println("Picking Nose");
+      fingerSetPoints[0] = 10;
+      fingerSetPoints[1] = 200;
+      fingerSetPoints[2] = 200;
+      fingerSetPoints[3] = 200;
     }
     Serial.flush();
   }
