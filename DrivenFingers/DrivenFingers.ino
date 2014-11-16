@@ -95,8 +95,18 @@ void loop(){
       servos[i].write(90-(pVal)*servoOrientation[i]);
     }
   }
+  
+  if(Serial.available()){
+    char input = Serial.read();
+    if(input == ('g')){
+      for(int i = 0; i < numFingers; i++) fingerSetPoints[i] = 127;
+    }
+    if(input == ('r')){
+      for(int i = 0; i < numFingers; i++) fingerSetPoints[i] = 10;
+    }
+    Serial.flush();
+  }
 }
-
 
 
 
