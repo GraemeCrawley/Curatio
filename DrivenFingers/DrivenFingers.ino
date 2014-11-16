@@ -20,7 +20,7 @@ int servoPins[numFingers] = {
   //Thumb - 10
   
 int servoOrientation[numFingers] = { 
-  -1,1,1,1};
+  -1,1,-1,-1};
 Servo servos[numFingers];
 
 int sensorValue = 0;        // value read from the pot
